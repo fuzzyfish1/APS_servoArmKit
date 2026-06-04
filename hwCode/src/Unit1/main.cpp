@@ -47,10 +47,6 @@ void setup() {
 
 	Serial.begin(115200);
 
-	pinMode(JOYY_AXS_PIN, INPUT);
-	pinMode(JOYX_AXS_PIN, INPUT);
-	pinMode(JOY_BTN_PIN, INPUT);
-
 	baseServo.attach(BASE_SRV_PIN, SRV_MIN_US, SRV_MAX_US);
 	shldServo.attach(SHLD_SRV_PIN, SRV_MIN_US, SRV_MAX_US);
 	elbwServo.attach(ELBW_SRV_PIN, SRV_MIN_US, SRV_MAX_US);
@@ -82,33 +78,33 @@ void loop() {
 	 ***/
 
 	// go to pos 1
-	baseServo.write(100);
-	delay(100);
-	shldServo.write(100);
-	delay(100);
-	elbwServo.write(100);
-	delay(100);
-	wrstServo.write(100);
-	delay(1000);
+	baseServo.write(00);
+	delay(200);
+	shldServo.write(90);
+	delay(200);
+	elbwServo.write(0);
+	delay(200);
+	wrstServo.write(90);
+	delay(2000);
 
 	// go to pos 2
-	baseServo.write(100);
-	delay(100);
-	shldServo.write(100);
-	delay(100);
-	elbwServo.write(100);
-	delay(100);
-	wrstServo.write(100);
-	delay(1000);
+	baseServo.write(90);
+	delay(200);
+	shldServo.write(45);
+	delay(200);
+	elbwServo.write(45);
+	delay(200);
+	wrstServo.write(135);
+	delay(2000);
 
-	// go to pos 3
-	baseServo.write(100);
-	delay(100);
-	shldServo.write(100);
-	delay(100);
-	elbwServo.write(100);
-	delay(100);
-	wrstServo.write(100);
-	delay(1000);
+	// // go to pos 3
+	// baseServo.write(100);
+	// delay(100);
+	// shldServo.write(100);
+	// delay(100);
+	// elbwServo.write(100);
+	// delay(100);
+	// wrstServo.write(100);
+	// delay(1000);
 
 }
