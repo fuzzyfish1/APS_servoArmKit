@@ -7,7 +7,7 @@
  *   IDE: [CLion + PlatformIO]
  * Author: Zain Ali
  *
- * APS ReadySetCode Servo Kit Unit 2: Joystick control
+ * APS ReadySetCode Servo Kit Unit 2 Starter Code: Joystick control
  *
  * Docs + links: labeled by skim or read or if you still want more
  *		https://www.electronicoscaldas.com/datasheet/MG90S_Tower-Pro.pdf?srsltid=AfmBOooEwEH2tjnxAT4QEQ_bXN8yQCYZHra_2rE_CHEPRiJlAYR6e1zs
@@ -48,23 +48,22 @@ void setup() {
 	Serial.begin(115200);
 	Serial.println("Unit 2");
 
-	pinMode(JOYY_AXS_PIN, INPUT);
-	pinMode(JOYX_AXS_PIN, INPUT);
-	pinMode(JOY_BTN_PIN, INPUT);
+	// insert joystick pinmode statements here
 
+	// copy all the attach from Unit1
 	baseServo.attach(BASE_SRV_PIN, SRV_MIN_US, SRV_MAX_US);
 	shldServo.attach(SHLD_SRV_PIN, SRV_MIN_US, SRV_MAX_US);
 	elbwServo.attach(ELBW_SRV_PIN, SRV_MIN_US, SRV_MAX_US);
 	wrstServo.attach(WRST_SRV_PIN, SRV_MIN_US, SRV_MAX_US);
 
-	// start at some position
-	baseServo.write(0);
+	// start at some position, copy
+	baseServo.write(90);
 	delay(100);
-	shldServo.write(0);
+	shldServo.write(90);
 	delay(100);
 	elbwServo.write(0);
 	delay(100);
-	wrstServo.write(0);
+	wrstServo.write(180);
 	delay(1000);
 }
 
@@ -72,24 +71,31 @@ int baseServoPos = 0;
 
 void loop() {
 
+	// read the sensor into joyx
+	// int joyx = ;
+
 	// you can see these prints in the serial graph, it would be cool to see for troubleshooting
-	int joyx = analogRead(JOYX_AXS_PIN);
 	Serial.print("Joystick X: ");
 	Serial.println(joyx);
 
-	// we could do this branchless, but joystick left, right gives us some extra print conditions for troubleshooting
-	if (joyx < 1024/2 - JOY_DEADBAND) {
+	// how do we account for joystick drift, wear, and hardware imperfections
+	if (joyx < 1024/2) {
+
+		/**
+		 * do we want the servo to go to the joystick position?
+		 * what happens when you let go of the joystick then?
+		 */
+
 		Serial.println("Joystick Left");
-		baseServoPos -= 1; // decrement
-		baseServoPos = min(max(baseServoPos, 0), 180); // constrain to 0-180 (servo range)
-		baseServo.write(baseServoPos);
+		// how do we make the servo turn towards the left
 		delay(100);
-	} else if (joyx > 1024/2 + JOY_DEADBAND) {
+
+	} else if (joyx > 1024/2) {
+
 		Serial.println("Joystick Right");
-		baseServoPos += 1; // increment
-		baseServoPos = min(max(baseServoPos, 0), 180); // constrain to 0-180 (servo range)
-		baseServo.write(baseServoPos);
+		// how do we make the servo turn towards the right
 		delay(100);
+
 	} else {
 		// in deadband (close enough to zero) don't do anything/move
 

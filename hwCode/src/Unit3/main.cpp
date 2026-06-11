@@ -7,7 +7,7 @@
  *   IDE: [CLion + PlatformIO]
  * Author: Zain Ali
  *
- * APS ReadySetCode Servo Kit Unit 3: Joystick Buttons
+ * APS ReadySetCode Servo Kit Unit 3 Starter Code: Joystick Buttons
  * continues from Unit2
  *
  * Docs + links: labeled by skim or read or if you still want more
@@ -73,12 +73,6 @@ int baseServoPos = 0;
 
 void loop() {
 
-	/** UNIT 3 **
-	 * Joystick X for Base Servo control
-	 * and
-	 * button press
-	 */
-
 	// you can see these prints in the serial graph, it would be cool to see for troubleshooting
 	int joyx = analogRead(JOYX_AXS_PIN);
 	Serial.print("Joystick X: ");
@@ -100,37 +94,36 @@ void loop() {
 
 	} else {
 		// in deadband (close enough to zero) don't do anything/move
+
+		// weird print statement to not clog up your serial terminal, its just for troubleshooting
+		static int lastPrint = 0;
+		if (millis() - lastPrint > 100) { // 100 ms apart prints
+			lastPrint = millis();
+			Serial.println("Joystick Center");
+		}
 	}
 
-	// you can see this as well in the serial grapher
-	int btnPressed = digitalRead(JOY_BTN_PIN);
+	// read the button into btnPressed
+	//int btnPressed = ;
 
+	// you can see this as well in the serial grapher
 	Serial.print("Button Pressed: ");
 	Serial.println(btnPressed);
 
 	if (btnPressed) {
-		// go to grab position
+
 		// you need to find these angles, mayhaps grab them from Unit1
 		Serial.println("Button Pressed");
 
-		shldServo.write(180);
-		delay(100);
-		elbwServo.write(0);
-		delay(100);
-		wrstServo.write(90);
-		delay(1000); // this will stall the code for 1s, there is a better way to do this
-		// this code is simple but we should be using nonblocking elapsed time logic rather than delay()
-		// this will be fixed later
+		// go to grab position
+
+		delay(1000);
 
 	} else {
 		// go back to home position
 		Serial.println("Button Released");
 
-		shldServo.write(90);
-		delay(100);
-		elbwServo.write(0);
-		delay(100);
-		wrstServo.write(180);
+
 
 	}
 }

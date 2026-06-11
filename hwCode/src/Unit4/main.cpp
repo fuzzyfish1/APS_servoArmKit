@@ -8,7 +8,7 @@
  *   IDE: [CLion + PlatformIO]
  * Author: Zain Ali
  *
- * APS ReadySetCode Servo Kit Final Code Unit 4: Arrays, Pointers and Kinematics
+ * APS ReadySetCode Servo Kit Starter Code Unit 4: Arrays, Pointers and Kinematics
  *
  * give this to the child, this is what they will start with,
  * also I split the code up better now due to now having the ability to give the kids an include directory
@@ -49,6 +49,7 @@ Servo wrstServo;
 // a list of Servo, its useful for passing as a parameter
 Servo* servoList[NUM_SERV] = {&baseServo, &shldServo, &elbwServo, &wrstServo};
 
+// suggested positions
 const int startPos[NUM_SERV] = {90,90,0,180};
 const float homePos[] = {90.f, 90.f, 0.f, 180.f};
 const float grabPos[] = {0.f, 180.f, 0.f, 90.f};
@@ -65,7 +66,7 @@ void setup() {
 	elbwServo.attach(ELBW_SRV_PIN, SRV_MIN_US, SRV_MAX_US);
 	wrstServo.attach(WRST_SRV_PIN, SRV_MIN_US, SRV_MAX_US);
 
-
+	// what do you think initServos does?
 	initServos(startPos, servoList);
 
 	delay(1000);
@@ -73,19 +74,15 @@ void setup() {
 
 void loop() {
 
+	// how do you think runSlow() works
 	// start at home
 	runSlow(homePos, servoList);
 	delay(2000);
 
 	// grab ball
-	runSlow(grabPos, servoList);
-	delay(2000);
 
 	// go home
-	runSlow(homePos, servoList);
-	delay(2000);
 
 	// drop it
-	runSlow(dropPos, servoList);
-	delay(2000);
+
 }

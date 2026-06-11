@@ -41,7 +41,6 @@ float usToAngle(const int &posUs);
  */
 int angleToUs(const float &angle);
 
-
 /** maxAbsList()
  * @param list a list of 4 floats
  * @return the number with the largest magnitude

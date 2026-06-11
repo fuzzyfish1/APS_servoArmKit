@@ -11,7 +11,6 @@
  * Kinematics and helper function implementations
  */
 
-
 // don't touch this variable, it is extern-ed elsewhere
 float currentAngles[NUM_SERV] = {90.f, 90.f, 0.f, 180.f};
 
