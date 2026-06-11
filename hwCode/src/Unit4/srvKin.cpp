@@ -104,5 +104,4 @@ void initServos(const int pos[NUM_SERV], Servo* servList[NUM_SERV]) {
 	for (int i = 0; i < NUM_SERV; i++) {
 		currentAngles[i] = pos[i];
 	}
-
 }
