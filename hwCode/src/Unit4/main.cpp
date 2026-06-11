@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <Servo.h>
+#include <srvKin.h>
 
 /**
  * System -
@@ -7,7 +8,23 @@
  *   IDE: [CLion + PlatformIO]
  * Author: Zain Ali
  *
- * APS ReadySetCode Servo Kit Unit 1
+ * APS ReadySetCode Servo Kit Final Code Unit 4: Arrays, Pointers and Kinematics
+ *
+ * give this to the child, this is what they will start with,
+ * also I split the code up better now due to now having the ability to give the kids an include directory
+ * this is controlling code only
+ *
+ * The code that you can teach with this is lists, arrays, and pointers
+ *		- A pointer, points to an object
+ *		- An Array, a space in memory with an indexable reference
+ *		- kinematics, calculating where things are supposed to be,
+ *		but that was kinda abstracted away sadly to focus more on code than math but we should seriously reconsider the math isn't that bad
+ *
+ * I have abstracted away kinematics and it's helpers into srvKin.h + srvKin.cpp
+ * it does have Doxygen Comments that should be recognizable to your IDE
+ *
+ * runSlow() -> blinks when running, as a sanity check for troubleshooting
+ * if things are blinking and nothing is moving, the problem might not be a software one
  *
  * Docs + links: labeled by skim or read or if you still want more
  *		https://www.electronicoscaldas.com/datasheet/MG90S_Tower-Pro.pdf?srsltid=AfmBOooEwEH2tjnxAT4QEQ_bXN8yQCYZHra_2rE_CHEPRiJlAYR6e1zs
@@ -24,122 +41,50 @@
 #define ELBW_SRV_PIN 5
 #define WRST_SRV_PIN 3
 
-//Pick any Analog pin for joystick
-#define JOYX_AXS_PIN A0
-#define JOYY_AXS_PIN A1
-
-// from datasheet
-#define SRV_MIN_US 1000
-#define SRV_MAX_US 2000
-
-// pick any remaining digital pin for joystick
-// #define JOY_BTN_PIN 2
-
-// program ctrl
-// #define JOY_DEADBAND 10
-#define NUM_SERV 4
-#define SRV_MAX_SPD (60.f / 1000.f) // 5 deg per seconds in deg /ms
-
 Servo baseServo;
 Servo shldServo;
 Servo elbwServo;
 Servo wrstServo;
 
-float msToAngle(const int& posUs) {
-	const float angle = (float)(posUs - SRV_MIN_US) * 180.0f / (float)(SRV_MAX_US - SRV_MIN_US);
-	const float clampedAngle = max(0.f, min(angle, 180.f));
-	return clampedAngle;
-}
+// a list of Servo, its useful for passing as a parameter
+Servo* servoList[NUM_SERV] = {&baseServo, &shldServo, &elbwServo, &wrstServo};
 
-int angleToMs (const float& angle) {
-	const float clampedAngle = max(0.f, min(angle, 180.f));
-	const int pulseUs = SRV_MIN_US + (int)(clampedAngle * (float)(SRV_MAX_US - SRV_MIN_US) / 180.0f);
-	return pulseUs;
-}
+const float homePos[] = {90.f, 90.f, 0.f, 180.f};
+const float grabPos[] = {0.f, 180.f, 0.f, 90.f};
+const float dropPos[] = {180.f, 180.f, 0.f, 90.f};
 
 void setup() {
 
+	// for print statements
 	Serial.begin(115200);
+	Serial.println("Servo Unit 4");
 
 	baseServo.attach(BASE_SRV_PIN, SRV_MIN_US, SRV_MAX_US);
 	shldServo.attach(SHLD_SRV_PIN, SRV_MIN_US, SRV_MAX_US);
 	elbwServo.attach(ELBW_SRV_PIN, SRV_MIN_US, SRV_MAX_US);
 	wrstServo.attach(WRST_SRV_PIN, SRV_MIN_US, SRV_MAX_US);
 
-	// start at some position
-	baseServo.write(90);
-	delay(100);
-	shldServo.write(90);
-	delay(100);
-	elbwServo.write(0);
-	delay(100);
-	wrstServo.write(180);
+	const int startPos[NUM_SERV] = {90,90,0,180};
+	initServos(&startPos[0], servoList);
+
 	delay(1000);
 }
 
-float maxAbsList (const float list[NUM_SERV]) {
-
-	float ret = abs(list[0]);
-
-	for (int i = 1; i < NUM_SERV; i++) {
-		ret = max(ret, abs(list[i]));
-	}
-
-	return ret;
-}
-
-// track current positions ourselves, don't rely on readMicroseconds after write()
-float currentAngles[NUM_SERV] = {90.f, 90.f, 0.f, 180.f};  // match your setup() writes
-
-void runSlow(const float pos[NUM_SERV]) {
-	Servo* servList[NUM_SERV] = {&baseServo, &shldServo, &elbwServo, &wrstServo};
-
-	float delt[NUM_SERV] = {};
-	for (int i = 0; i < NUM_SERV; i++) {
-		delt[i] = pos[i] - currentAngles[i];
-	}
-
-	float maxAbs = maxAbsList(delt);
-	if (maxAbs < 0.01f) return;
-
-	float moveDurationMs = maxAbs / SRV_MAX_SPD;
-
-	Serial.print("moveDurationMs: ");
-	Serial.println(moveDurationMs);  // should now be e.g. 90000 for 90 deg at 1deg/s
-
-	float velList[NUM_SERV] = {};
-	for (int i = 0; i < NUM_SERV; i++) {
-		velList[i] = delt[i] / moveDurationMs;
-	}
-
-	long initUs = micros();
-	long moveDurationUs = (long)(moveDurationMs * 1000.f);
-
-	while (true) {
-		long elapsedUs = micros() - initUs;
-		if (elapsedUs >= moveDurationUs) break;
-
-		float elapsedMs = elapsedUs / 1000.f;
-		for (int i = 0; i < NUM_SERV; i++) {
-			float angle = currentAngles[i] + velList[i] * elapsedMs;
-			servList[i]->writeMicroseconds(angleToMs(angle));
-		}
-	}
-
-	for (int i = 0; i < NUM_SERV; i++) {
-		servList[i]->writeMicroseconds(angleToMs(pos[i]));
-		currentAngles[i] = pos[i];
-	}
-}
 void loop() {
 
-	digitalWrite(LED_BUILTIN, HIGH);
-	const float pos[] = {180.f, 90.f, 0.f, 45.f};
-	runSlow(&pos[0]);
-	// delay(2000);
+	// start at home
+	runSlow(homePos, servoList);
+	delay(2000);
 
-	digitalWrite(LED_BUILTIN, LOW);
-	const float pos2[] = {0.f, 45.f, 45.f, 135.f};
-	runSlow(&pos2[0]);
-	// delay(2000);
+	// grab ball
+	runSlow(grabPos, servoList);
+	delay(2000);
+
+	// go home
+	runSlow(homePos, servoList);
+	delay(2000);
+
+	// drop it
+	runSlow(dropPos, servoList);
+	delay(2000);
 }

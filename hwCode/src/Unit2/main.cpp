@@ -7,7 +7,7 @@
  *   IDE: [CLion + PlatformIO]
  * Author: Zain Ali
  *
- * APS ReadySetCode Servo Kit Unit 2
+ * APS ReadySetCode Servo Kit Unit 2: Joystick control
  *
  * Docs + links: labeled by skim or read or if you still want more
  *		https://www.electronicoscaldas.com/datasheet/MG90S_Tower-Pro.pdf?srsltid=AfmBOooEwEH2tjnxAT4QEQ_bXN8yQCYZHra_2rE_CHEPRiJlAYR6e1zs
@@ -46,6 +46,7 @@ Servo wrstServo;
 void setup() {
 
 	Serial.begin(115200);
+	Serial.println("Unit 2");
 
 	pinMode(JOYY_AXS_PIN, INPUT);
 	pinMode(JOYX_AXS_PIN, INPUT);
@@ -67,37 +68,36 @@ void setup() {
 	delay(1000);
 }
 
-float baseServoPos = 0;
-float shldServoPos = 0;
-float elbwServoPos = 0;
-float wrstServoPos = 0;
+int baseServoPos = 0;
 
 void loop() {
 
-	/** UNIT 2 **
-	 * Joystick X for Base Servo control
-	 */
-
-	// you can see these prints in the serial graph, it would be cool to see for troublesooting
+	// you can see these prints in the serial graph, it would be cool to see for troubleshooting
 	int joyx = analogRead(JOYX_AXS_PIN);
 	Serial.print("Joystick X: ");
 	Serial.println(joyx);
 
+	// we could do this branchless, but joystick left, right gives us some extra print conditions for troubleshooting
 	if (joyx < 1024/2 - JOY_DEADBAND) {
 		Serial.println("Joystick Left");
 		baseServoPos -= 1; // decrement
-		baseServoPos = min(max(baseServoPos, 0), 180); // constrain to 0-180 (servo range
+		baseServoPos = min(max(baseServoPos, 0), 180); // constrain to 0-180 (servo range)
 		baseServo.write(baseServoPos);
 		delay(100);
 	} else if (joyx > 1024/2 + JOY_DEADBAND) {
 		Serial.println("Joystick Right");
 		baseServoPos += 1; // increment
-		baseServoPos = min(max(baseServoPos, 0), 180); // constrain to 0-180 (servo range
+		baseServoPos = min(max(baseServoPos, 0), 180); // constrain to 0-180 (servo range)
 		baseServo.write(baseServoPos);
 		delay(100);
 	} else {
 		// in deadband (close enough to zero) don't do anything/move
-	}
 
-	/** ^^ UNIT 2 ^^*/
+		// weird print statement to not clog up your serial terminal, its just for troubleshooting
+		static int lastPrint = 0;
+		if (millis() - lastPrint > 100) { // 100 ms apart prints
+			lastPrint = millis();
+			Serial.println("Joystick Center");
+		}
+	}
 }
